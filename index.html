@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20/10</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a0f2e 100%);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.3));
+        }
+
+        .flower {
+            filter: drop-shadow(0 0 20px rgba(255, 105, 180, 0.5));
+        }
+
+        .title {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 52px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            animation: titleFade 2s ease-in-out 12s forwards;
+            pointer-events: none;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+            letter-spacing: 2px;
+        }
+
+        @keyframes titleFade {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .reset-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .reset-btn:hover {
+            background: #ff1493;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.6);
+            transform: scale(1.05);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg id="canvas" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <style>
+                    @keyframes stemGrow {
+                        from { 
+                            stroke-dashoffset: 300;
+                            opacity: 0;
+                        }
+                        to { 
+                            stroke-dashoffset: 0;
+                            opacity: 1;
+                        }
+                    }
+
+                    @keyframes leafGrow {
+                        0% { 
+                            opacity: 0; 
+                            transform: translate(0, 0) scale(0.3) rotate(-45deg);
+                        }
+                        60% {
+                            opacity: 0.9;
+                        }
+                        100% { 
+                            opacity: 1; 
+                            transform: translate(0, 0) scale(1) rotate(0deg);
+                        }
+                    }
+
+                    @keyframes leafGrowLeft {
+                        0% { 
+                            opacity: 0; 
+                            transform: translate(0, 0) scale(0.2) rotate(45deg);
+                        }
+                        60% {
+                            opacity: 0.9;
+                        }
+                        100% { 
+                            opacity: 1; 
+                            transform: translate(0, 0) scale(1) rotate(0deg);
+                        }
+                    }
+
+                    @keyframes petalBloom {
+                        0% { 
+                            opacity: 0; 
+                            r: 0;
+                            filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.5));
+                        }
+                        50% { 
+                            opacity: 0.8; 
+                            filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.8));
+                        }
+                        100% { 
+                            opacity: 1; 
+                            r: 28;
+                            filter: drop-shadow(0 0 15px rgba(255, 105, 180, 1));
+                        }
+                    }
+
+                    @keyframes petalBloom2 {
+                        0% { 
+                            opacity: 0; 
+                            r: 0;
+                        }
+                        50% { 
+                            opacity: 0.8; 
+                        }
+                        100% { 
+                            opacity: 1; 
+                            r: 18;
+                        }
+                    }
+
+                    @keyframes textAppear {
+                        0% {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                </style>
+            </defs>
+
+            <!-- Stars/sparks background -->
+            <g id="sparkles"></g>
+
+            <!-- Text at top -->
+            <text id="mainText" x="400" y="80" text-anchor="middle" font-size="52" font-weight="bold" fill="#ffffff" style="animation: textAppear 1s ease-out 6s forwards; opacity: 0; text-shadow: 0 0 20px rgba(255, 105, 180, 0.5); letter-spacing: 2;">
+                Chúc chị Xíu 20/10 vui vẻ
+            </text>
+
+            <!-- Flowers container -->
+            <g id="flowers"></g>
+        </svg>
+
+        <button class="reset-btn" onclick="location.reload()">Lại từ đầu</button>
+    </div>
+
+    <script>
+        class FlowerAnimation {
+            constructor() {
+                this.canvas = document.getElementById('canvas');
+                this.flowers = [];
+                this.startTime = Date.now();
+                this.createSparkles();
+                this.createFlowers();
+                this.animate();
+            }
+
+            createSparkles() {
+                const sparklesGroup = document.getElementById('sparkles');
+                for (let i = 0; i < 30; i++) {
+                    const x = Math.random() * 800;
+                    const y = Math.random() * 300 + 50;
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', Math.random() * 2 + 0.5);
+                    circle.setAttribute('fill', '#ffd700');
+                    circle.setAttribute('opacity', Math.random() * 0.5 + 0.3);
+                    sparklesGroup.appendChild(circle);
+                }
+            }
+
+            createFlowers() {
+                const flowersGroup = document.getElementById('flowers');
+                const positions = [
+                    { x: 180, startDelay: 0 },
+                    { x: 400, startDelay: 1200 },
+                    { x: 620, startDelay: 2400 }
+                ];
+
+                positions.forEach((pos, idx) => {
+                    const flower = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    flower.setAttribute('class', 'flower');
+                    flower.setAttribute('id', `flower-${idx}`);
+
+                    // Main stem - curved and realistic
+                    const stem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    stem.setAttribute('d', `M ${pos.x} 500 Q ${pos.x - 15} 420 ${pos.x - 8} 320 Q ${pos.x - 5} 280 ${pos.x} 260`);
+                    stem.setAttribute('stroke', '#1a4d0f');
+                    stem.setAttribute('stroke-width', '5');
+                    stem.setAttribute('fill', 'none');
+                    stem.setAttribute('stroke-linecap', 'round');
+                    stem.setAttribute('stroke-dasharray', '300');
+                    stem.setAttribute('style', `animation: stemGrow 2s ease-in-out ${pos.startDelay}ms forwards; animation-fill-mode: forwards;`);
+                    flower.appendChild(stem);
+
+                    // Thick stem for depth
+                    const stemShadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    stemShadow.setAttribute('d', `M ${pos.x} 500 Q ${pos.x - 15} 420 ${pos.x - 8} 320 Q ${pos.x - 5} 280 ${pos.x} 260`);
+                    stemShadow.setAttribute('stroke', '#0d2e07');
+                    stemShadow.setAttribute('stroke-width', '7');
+                    stemShadow.setAttribute('fill', 'none');
+                    stemShadow.setAttribute('stroke-linecap', 'round');
+                    stemShadow.setAttribute('stroke-dasharray', '300');
+                    stemShadow.setAttribute('opacity', '0.5');
+                    stemShadow.setAttribute('style', `animation: stemGrow 2s ease-in-out ${pos.startDelay}ms forwards; animation-fill-mode: forwards;`);
+                    flower.appendChild(stemShadow);
+
+                    // Left leaf - detailed and curved
+                    const leaf1Path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    leaf1Path.setAttribute('d', `M ${pos.x - 8} 380 Q ${pos.x - 35} 395 ${pos.x - 42} 420 Q ${pos.x - 40} 435 ${pos.x - 28} 440 Q ${pos.x - 15} 430 ${pos.x - 8} 400 Z`);
+                    leaf1Path.setAttribute('fill', '#2d7d1a');
+                    leaf1Path.setAttribute('stroke', '#1a4d0f');
+                    leaf1Path.setAttribute('stroke-width', '1');
+                    leaf1Path.setAttribute('style', `animation: leafGrowLeft 1s ease-out ${pos.startDelay + 1000}ms forwards; animation-fill-mode: forwards; opacity: 0; transform-origin: ${pos.x - 8}px 380px;`);
+                    flower.appendChild(leaf1Path);
+
+                    // Right leaf - detailed and curved
+                    const leaf2Path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    leaf2Path.setAttribute('d', `M ${pos.x + 8} 350 Q ${pos.x + 38} 355 ${pos.x + 48} 375 Q ${pos.x + 45} 395 ${pos.x + 30} 400 Q ${pos.x + 15} 385 ${pos.x + 8} 360 Z`);
+                    leaf2Path.setAttribute('fill', '#3da021');
+                    leaf2Path.setAttribute('stroke', '#1a4d0f');
+                    leaf2Path.setAttribute('stroke-width', '1');
+                    leaf2Path.setAttribute('style', `animation: leafGrow 1s ease-out ${pos.startDelay + 1100}ms forwards; animation-fill-mode: forwards; opacity: 0; transform-origin: ${pos.x + 8}px 350px;`);
+                    flower.appendChild(leaf2Path);
+
+                    // Bottom decorative leaves cluster
+                    const bottomLeaves = [
+                        { x: pos.x - 18, y: 465, angle: -30, scale: 0.9 },
+                        { x: pos.x + 12, y: 475, angle: 35, scale: 0.85 },
+                        { x: pos.x - 5, y: 495, angle: 5, scale: 0.95 }
+                    ];
+
+                    bottomLeaves.forEach((leaf, lidx) => {
+                        const leafPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        leafPath.setAttribute('d', `M ${leaf.x} ${leaf.y} Q ${leaf.x - 8} ${leaf.y + 15} ${leaf.x} ${leaf.y + 28} Q ${leaf.x + 8} ${leaf.y + 15} ${leaf.x} ${leaf.y} Z`);
+                        leafPath.setAttribute('fill', '#2d5016');
+                        leafPath.setAttribute('stroke', '#1a3009');
+                        leafPath.setAttribute('stroke-width', '0.5');
+                        leafPath.setAttribute('transform', `rotate(${leaf.angle} ${leaf.x} ${leaf.y})`);
+                        leafPath.setAttribute('style', `animation: leafGrow 0.8s ease-out ${pos.startDelay + 900 + lidx * 100}ms forwards; animation-fill-mode: forwards; opacity: 0; transform-origin: ${leaf.x}px ${leaf.y}px;`);
+                        flower.appendChild(leafPath);
+                    });
+
+                    // Petals (5 petals with gradient effect)
+                    const petalColors = ['#ff3399', '#ff1493', '#ff69b4', '#ff2590', '#ff0080'];
+                    for (let p = 0; p < 5; p++) {
+                        const angle = (p * 72) * Math.PI / 180;
+                        const cx = pos.x + Math.cos(angle) * 40;
+                        const cy = 260 + Math.sin(angle) * 40;
+                        
+                        const petal = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        petal.setAttribute('cx', cx);
+                        petal.setAttribute('cy', cy);
+                        petal.setAttribute('r', '0');
+                        petal.setAttribute('fill', petalColors[p]);
+                        const delay = pos.startDelay + 2000 + (p * 80);
+                        petal.setAttribute('style', `animation: petalBloom 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}ms forwards; animation-fill-mode: forwards;`);
+                        flower.appendChild(petal);
+                    }
+
+                    // Center with glow
+                    const centerGlow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    centerGlow.setAttribute('cx', pos.x);
+                    centerGlow.setAttribute('cy', 260);
+                    centerGlow.setAttribute('r', '0');
+                    centerGlow.setAttribute('fill', '#ffffaa');
+                    centerGlow.setAttribute('opacity', '0.6');
+                    centerGlow.setAttribute('style', `animation: petalBloom2 0.8s ease-out ${pos.startDelay + 2400}ms forwards; animation-fill-mode: forwards;`);
+                    flower.appendChild(centerGlow);
+
+                    const center = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    center.setAttribute('cx', pos.x);
+                    center.setAttribute('cy', 260);
+                    center.setAttribute('r', '0');
+                    center.setAttribute('fill', '#ffeb3b');
+                    center.setAttribute('style', `animation: petalBloom2 0.6s ease-out ${pos.startDelay + 2500}ms forwards; animation-fill-mode: forwards;`);
+                    flower.appendChild(center);
+
+                    flowersGroup.appendChild(flower);
+                });
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Start animation when page loads
+        window.addEventListener('load', () => {
+            new FlowerAnimation();
+        });
+    </script>
+</body>
+</html>
